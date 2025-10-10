@@ -175,7 +175,7 @@ th { background: #007bff; color: white; }
     <thead>
       <tr>
         <th>#</th>
-        <th>Tempo Bruto</th>
+        <th>Tempo Bruto (min)</th>
         <th>Pares por dia</th>
         <th>Pares por hora</th>
       </tr>
@@ -209,9 +209,9 @@ const summaryText = document.getElementById("summaryText");
 const closeModalBtn = document.getElementById("closeModalBtn");
 
 /**
- * centezimalUnits: unidades internas (1 unidade = 60ms).
+ * Unidades internas: 1 unidade = 60 ms.
  * 1000 unidades = 1 minuto.
- * formatTime converte unidades para M.CCC (minutos.centezimal).
+ * formatTime recebe unidades e mostra M.CCC (minutos.centezimal).
  */
 function formatTime(centezimalUnits){
   const totalMinutes = centezimalUnits / 1000;
@@ -256,24 +256,33 @@ function reset(){
   registerBtn.disabled = true;
 }
 
+// Ao registrar, armazenamos também os "units" (partialTime) como data-units no <td>
 function register(){
   if(partialTime === 0) return;
+  const units = partialTime; // unidades internas (inteiro)
+  const minBruto = units / 1000; // minutos (float)
+  const paresDia = minBruto === 0 ? 0 : (528 / minBruto).toFixed(2);
+  const paresHora = minBruto === 0 ? 0 : (60 / minBruto).toFixed(2);
+
   registerCount++;
-  const minBruto = partialTime / 1000; // minutos
-  const paresDia = (528 / minBruto).toFixed(2);
-  const paresHora = (60 / minBruto).toFixed(2);
   const row = document.createElement("tr");
-  row.innerHTML = `<td>${registerCount}</td><td>${minBruto.toFixed(3)}</td><td>${paresDia}</td><td>${paresHora}</td>`;
+  // armazenar units no atributo data-units do <td> para cálculo exato depois
+  row.innerHTML = `<td>${registerCount}</td>
+                   <td data-units="${units}">${minBruto.toFixed(3)}</td>
+                   <td>${paresDia}</td>
+                   <td>${paresHora}</td>`;
   logTableBody.appendChild(row);
+
   partialTime = 0;
   updateDisplay();
 }
 
 /* 
-  showSummary:
-  - pausa o cronômetro (stop)
-  - calcula a média do tempo bruto a partir da coluna "Tempo Bruto"
-  - usa essa média para calcular pares/hora e pares/dia
+ showSummary:
+ - pausa o cronômetro
+ - soma os data-units de cada registro (valores exatos inteiros)
+ - calcula média em unidades, converte para minutos médios
+ - calcula pares/hora = 60 / mediaMinutos e pares/dia = 528 / mediaMinutos
 */
 function showSummary(){
   stop(); // pausa o cronômetro automaticamente
@@ -285,28 +294,29 @@ function showSummary(){
     return;
   }
 
-  // soma dos tempos (em minutos, porque na tabela armazenamos minBruto.toFixed(3))
-  let somaMinutos = 0;
+  let totalUnits = 0;
   rows.forEach(r => {
-    const textoTempo = r.children[1].textContent.trim(); // ex: "1.234"
-    const minutos = parseFloat(textoTempo.replace(',', '.'));
-    if(!isNaN(minutos)) somaMinutos += minutos;
+    const td = r.children[1];
+    const unitsAttr = td.getAttribute('data-units');
+    const units = parseInt(unitsAttr, 10);
+    if(!isNaN(units)) totalUnits += units;
   });
 
   const n = rows.length;
-  const mediaMinutos = somaMinutos / n; // média em minutos (float)
+  const avgUnits = totalUnits / n; // média em unidades (pode ser float)
+  const avgMinutes = avgUnits / 1000; // média em minutos
 
-  // formatar tempo médio no mesmo padrão M.CCC:
-  const mediaCentezimalUnits = Math.round(mediaMinutos * 1000); // converter minutos -> unidades internas
-  const mediaTempoFormatado = formatTime(mediaCentezimalUnits);
+  // Formatar tempo médio: convertemos a média de unidades para o formato M.CCC (arredondando unidades)
+  const avgUnitsRounded = Math.round(avgUnits);
+  const tempoMedioFormatado = formatTime(avgUnitsRounded);
 
-  // calcular pares por hora e pares por dia com base na média do tempo
-  const paresHora = mediaMinutos === 0 ? 0 : (60 / mediaMinutos);
-  const paresDia = mediaMinutos === 0 ? 0 : (528 / mediaMinutos);
+  // Calcular pares/hora e pares/dia com base no tempo médio exato (não arredondado)
+  const paresHora = avgMinutes === 0 ? 0 : (60 / avgMinutes);
+  const paresDia = avgMinutes === 0 ? 0 : (528 / avgMinutes);
 
   summaryText.innerHTML = `
     <strong>Registros:</strong> ${n}<br>
-    <strong>Tempo médio:</strong> ${mediaTempoFormatado} min<br>
+    <strong>Tempo médio:</strong> ${tempoMedioFormatado} min<br>
     <strong>Média pares/dia:</strong> ${paresDia.toFixed(2)}<br>
     <strong>Média pares/hora:</strong> ${paresHora.toFixed(2)}
   `;
