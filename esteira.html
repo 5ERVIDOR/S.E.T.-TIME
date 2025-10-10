@@ -2,19 +2,19 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Produtividade da Esteira</title>
 <style>
 body {
   font-family: Arial, sans-serif;
   background: url('https://img.freepik.com/fotos-premium/cronometro-no-fundo-desfocado_175024-13.jpg') no-repeat center center fixed;
   background-size: cover;
-  padding:30px;
+  padding:5vw;
   text-align:center;
-  color: #0f0;
+  color:#0f0;
   position: relative;
-  min-height: 100vh;
+  min-height:100vh;
 }
-
 body::before {
   content:"";
   position:absolute;
@@ -23,105 +23,42 @@ body::before {
   background-color: rgba(0,0,0,0.85);
   z-index:0;
 }
+h1, a, .display-container, button, .log { position:relative; z-index:1; }
 
-h1, a, .display-container, button, .log {
-  position: relative;
-  z-index: 1;
-}
+h1 { font-size:8vw; margin-bottom:4vw; display:flex; align-items:center; justify-content:center; gap:2vw; }
+a { text-decoration:none; color:#0f0; font-size:4vw; margin-bottom:4vw; display:inline-block; }
 
-h1 {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  margin-bottom:15px;
-  color:#0f0;
-  font-size:36px;
-}
+.display-container { background:#111; color:#0f0; padding:8vw; border-radius:4vw; margin:auto; margin-bottom:4vw; width:90%; max-width:500px;}
+.display { font-size:18vw; font-family:monospace; font-weight:bold; text-shadow:0 0 20px #0f0; }
+.partial-display { font-size:10vw; margin-top:2vw; text-shadow:0 0 10px #0f0; }
+.subtitle { font-size:5vw; margin-top:1vw; }
 
-a {
-  text-decoration:none;
-  color:#0f0;
-  margin-bottom:20px;
-  display:inline-block;
-  font-size:18px;
-}
-
-.display-container {
-  background:#111;
-  color:#0f0;
-  padding:40px;
-  border-radius:15px;
-  width:500px;
-  margin:auto;
-  margin-bottom:20px;
-}
-
-.display {
-  font-size:90px;
-  font-family:monospace;
-  font-weight:bold;
-  text-shadow:0 0 20px #0f0;
-}
-
-.partial-display {
-  font-size:50px;
-  color:#0f0;
-  margin-top:15px;
-  text-shadow:0 0 10px #0f0;
-}
-
-.subtitle {
-  font-size:20px;
-  color:#0f0;
-  margin-top:10px;
-}
-
-button {
-  padding:15px 25px;
-  margin:10px;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:bold;
-  font-size:18px;
-}
-
+button { padding:3vw 5vw; margin:2vw; border:none; border-radius:3vw; font-weight:bold; font-size:5vw; cursor:pointer; }
 .start { background:#28a745; color:white; }
 .stop { background:#dc3545; color:white; }
 .reset { background:#6c757d; color:white; }
-.register { background:#007bff; color:white; width:95%; margin-top:15px; font-size:20px; }
+.register { background:#007bff; color:white; width:90%; margin-top:3vw; font-size:5vw; }
 
-.log {
-  margin-top:30px;
-  text-align:center;
-  max-width:900px;
-  margin-left:auto;
-  margin-right:auto;
-}
+.log { margin-top:4vw; max-width:95%; margin-left:auto; margin-right:auto; }
+table { width:100%; border-collapse: collapse; margin-top:2vw; font-size:4vw; }
+th, td { border:1px solid #ccc; padding:2vw; text-align:center; }
+th { background:#007bff; color:white; }
 
-table {
-  width:100%;
-  border-collapse: collapse;
-  margin-top:15px;
-  font-size:18px;
-}
-
-th, td {
-  border:1px solid #ccc;
-  padding:10px;
-  text-align:center;
-}
-
-th {
-  background:#007bff;
-  color:white;
+@media(min-width:768px){
+  h1{ font-size:36px; gap:8px; }
+  a{ font-size:18px; }
+  .display-container{ padding:40px; border-radius:15px;}
+  .display{ font-size:90px; }
+  .partial-display{ font-size:50px; }
+  .subtitle{ font-size:20px; }
+  button{ font-size:18px; padding:15px 25px; border-radius:10px; }
+  table{ font-size:18px; }
 }
 </style>
 </head>
 <body>
 <h1>📊 Produtividade da Esteira</h1>
-<a href="index.php">⬅ Voltar</a>
+<a href="index.html">⬅ Voltar</a>
 
 <div class="display-container">
   <div id="display" class="display">0.000</div>
@@ -154,84 +91,59 @@ th {
 </div>
 
 <script>
-let totalTime = 0;
-let partialTime = 0;
-let interval = null;
-let running = false;
-let registerCount = 0;
+let totalTime=0, partialTime=0, interval=null, running=false, registerCount=0;
+const display=document.getElementById("display");
+const partialDisplay=document.getElementById("partialDisplay");
+const startBtn=document.getElementById("startBtn");
+const stopBtn=document.getElementById("stopBtn");
+const resetBtn=document.getElementById("resetBtn");
+const registerBtn=document.getElementById("registerBtn");
+const logTableBody=document.querySelector("#logTable tbody");
 
-const display = document.getElementById("display");
-const partialDisplay = document.getElementById("partialDisplay");
-const startBtn = document.getElementById("startBtn");
-const stopBtn = document.getElementById("stopBtn");
-const resetBtn = document.getElementById("resetBtn");
-const registerBtn = document.getElementById("registerBtn");
-const logTableBody = document.querySelector("#logTable tbody");
-
-function formatTime(centezimalUnits) {
-  const totalMinutes = centezimalUnits / 1000;
-  const minutes = Math.floor(totalMinutes);
-  const cPart = Math.round((totalMinutes - minutes) * 1000);
+function formatTime(centezimalUnits){
+  const totalMinutes=centezimalUnits/1000;
+  const minutes=Math.floor(totalMinutes);
+  const cPart=Math.round((totalMinutes-minutes)*1000);
   return `${minutes}.${cPart.toString().padStart(3,'0')}`;
 }
 
-function updateDisplay() {
-  display.textContent = formatTime(totalTime);
-  partialDisplay.textContent = "Tempo Parcial: " + formatTime(partialTime);
+function updateDisplay(){
+  display.textContent=formatTime(totalTime);
+  partialDisplay.textContent="Tempo Parcial: "+formatTime(partialTime);
 }
 
-function start() {
-  if (!running) {
-    running = true;
-    interval = setInterval(() => {
-      totalTime++;
-      partialTime++;
+function start(){
+  if(!running){
+    running=true;
+    interval=setInterval(()=>{
+      totalTime++; partialTime++;
       updateDisplay();
-    }, 60);
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-    registerBtn.disabled = false;
+    },60);
+    startBtn.disabled=true;
+    stopBtn.disabled=false;
+    registerBtn.disabled=false;
   }
 }
-
-function stop() {
-  running = false;
-  clearInterval(interval);
-  startBtn.disabled = false;
-  stopBtn.disabled = true;
-}
-
-function reset() {
-  totalTime = 0;
-  partialTime = 0;
-  updateDisplay();
-  logTableBody.innerHTML = "";
-  registerCount = 0;
-  stop();
-  registerBtn.disabled = true;
-}
-
-function register() {
-  if (partialTime === 0) return;
+function stop(){ running=false; clearInterval(interval); startBtn.disabled=false; stopBtn.disabled=true; }
+function reset(){ totalTime=0; partialTime=0; updateDisplay(); logTableBody.innerHTML=""; registerCount=0; stop(); registerBtn.disabled=true; }
+function register(){
+  if(partialTime===0) return;
   registerCount++;
-  const minBruto = partialTime / 1000;
-  const paresDia = (528 / minBruto).toFixed(2);
-  const paresHora = (60 / minBruto).toFixed(2);
-  const paresMenos10 = (paresDia * 0.9).toFixed(2);
-
-  const row = document.createElement("tr");
-  row.innerHTML = `<td>${registerCount}</td><td>${formatTime(partialTime)}</td><td>${paresDia}</td><td>${paresHora}</td><td>${paresMenos10}</td>`;
+  const minBruto=partialTime/1000;
+  const paresDia=(528/minBruto).toFixed(2);
+  const paresHora=(60/minBruto).toFixed(2);
+  const paresMenos10=(paresDia*0.9).toFixed(2);
+  const row=document.createElement("tr");
+  row.innerHTML=`<td>${registerCount}</td><td>${formatTime(partialTime)}</td><td>${paresDia}</td><td>${paresHora}</td><td>${paresMenos10}</td>`;
   logTableBody.appendChild(row);
-
-  partialTime = 0;
+  partialTime=0;
   updateDisplay();
 }
 
-startBtn.onclick = start;
-stopBtn.onclick = stop;
-resetBtn.onclick = reset;
-registerBtn.onclick = register;
-
+startBtn.onclick=start;
+stopBtn.onclick=stop;
+resetBtn.onclick=reset;
+registerBtn.onclick=register;
 updateDisplay();
 </script>
 </body>
