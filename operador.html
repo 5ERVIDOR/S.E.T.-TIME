@@ -5,88 +5,148 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Produtividade do Operador</title>
 <style>
-body { font-family:Arial,sans-serif; background:url('https://img.freepik.com/fotos-premium/cronometro-no-fundo-desfocado_175024-13.jpg') no-repeat center center fixed; background-size:cover; padding:5vw; text-align:center; color:#0f0; position:relative; min-height:100vh;}
-body::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.85); z-index:0;}
-h1,a,.display-container,button,.log { position:relative; z-index:1; }
-h1 { font-size:8vw; margin-bottom:4vw; display:flex; align-items:center; justify-content:center; gap:2vw; }
-a { text-decoration:none; color:#0f0; font-size:4vw; margin-bottom:4vw; display:inline-block; }
-.display-container { background:#111; color:#0f0; padding:8vw; border-radius:4vw; margin:auto; margin-bottom:4vw; width:90%; max-width:500px;}
-.display { font-size:18vw; font-family:monospace; font-weight:bold; text-shadow:0 0 20px #0f0; }
-.partial-display { font-size:10vw; margin-top:2vw; text-shadow:0 0 10px #0f0; }
-.subtitle { font-size:5vw; margin-top:1vw; }
-button { padding:3vw 5vw; margin:2vw; border:none; border-radius:3vw; font-weight:bold; font-size:5vw; cursor:pointer; transition:0.2s; }
-button:hover { opacity:0.9; transform:scale(1.05); }
-.start { background:#28a745; color:white; }
-.stop { background:#dc3545; color:white; }
-.reset { background:#6c757d; color:white; }
-.summary { background:#ffc107; color:black; }
-.register { background:#007bff; color:white; width:90%; margin-top:3vw; font-size:5vw; }
-.log { margin-top:4vw; max-width:95%; margin-left:auto; margin-right:auto; }
-table { width:100%; border-collapse: collapse; margin-top:2vw; font-size:4vw; }
-th, td { border:1px solid #ccc; padding:2vw; text-align:center; }
-th { background:#007bff; color:white; }
-
-/* 🔹 Estilos do modal */
-.modal-overlay {
-  position: fixed;
+body {
+  font-family: Arial, sans-serif;
+  background: url('https://img.freepik.com/fotos-premium/cronometro-no-fundo-desfocado_175024-13.jpg') no-repeat center center fixed;
+  background-size: cover;
+  padding: 5vw;
+  text-align: center;
+  color: #0f0;
+  position: relative;
+  min-height: 100vh;
+}
+body::before {
+  content: "";
+  position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.7);
-  display: none;
-  justify-content: center;
+  background-color: rgba(0,0,0,0.85);
+  z-index: 0;
+}
+h1, a, .display-container, button, .log, .modal {
+  position: relative;
+  z-index: 1;
+}
+h1 {
+  font-size: 8vw;
+  margin-bottom: 4vw;
+  display: flex;
   align-items: center;
-  z-index: 999;
+  justify-content: center;
+  gap: 2vw;
 }
-.modal {
-  background-color: #111;
-  border: 2px solid #0f0;
-  border-radius: 15px;
-  padding: 30px;
-  width: 90%;
-  max-width: 400px;
+a {
+  text-decoration: none;
   color: #0f0;
+  font-size: 4vw;
+  margin-bottom: 4vw;
+  display: inline-block;
+}
+.display-container {
+  background: #111;
+  color: #0f0;
+  padding: 4vw;
+  border-radius: 2vw;
+  margin: auto;
+  margin-bottom: 3vw;
+  width: 85%;
+  max-width: 420px;
+  box-shadow: 0 0 10px #0f0;
+}
+.display {
+  font-size: 18vw;
+  font-family: monospace;
+  font-weight: bold;
+  text-shadow: 0 0 20px #0f0;
+}
+.partial-display {
+  font-size: 10vw;
+  margin-top: 2vw;
+  text-shadow: 0 0 10px #0f0;
+}
+.subtitle {
+  font-size: 5vw;
+  margin-top: 1vw;
+}
+button {
+  padding: 3vw 5vw;
+  margin: 2vw;
+  border: none;
+  border-radius: 3vw;
+  font-weight: bold;
+  font-size: 5vw;
+  cursor: pointer;
+  transition: 0.12s;
+}
+button:hover { transform: translateY(-2px); }
+.start { background: #28a745; color: white; }
+.stop { background: #dc3545; color: white; }
+.reset { background: #6c757d; color: white; }
+.summary { background: #ffc107; color: black; }
+.register { background: #007bff; color: white; width: 90%; margin-top: 3vw; font-size: 5vw; }
+.log { margin-top: 4vw; max-width: 95%; margin-left: auto; margin-right: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2vw;
+  font-size: 4vw;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 2vw;
   text-align: center;
-  box-shadow: 0 0 20px #0f0;
-  animation: fadeIn 0.3s ease-in-out;
 }
-.modal h2 {
-  margin-bottom: 15px;
-  font-size: 6vw;
+th { background: #007bff; color: white; }
+
+/* Modal (Resumo) */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 10;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.8);
 }
-.modal p {
-  font-size: 4.5vw;
+.modal-content {
+  background: #111;
+  margin: 12% auto;
+  padding: 18px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 420px;
+  color: #0f0;
+  box-shadow: 0 0 15px #0f0;
+  text-align: center;
+}
+.modal-content h3 {
+  margin-top: 0;
+  text-shadow: 0 0 10px #0f0;
+}
+.modal-content p {
+  font-size: 5vw;
   margin: 8px 0;
 }
 .close-btn {
-  margin-top: 20px;
-  background: #0f0;
-  color: #000;
-  font-weight: bold;
+  background: #dc3545;
+  color: white;
   border: none;
-  border-radius: 8px;
   padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 5vw;
   cursor: pointer;
-  font-size: 4.5vw;
+  margin-top: 12px;
 }
-.close-btn:hover {
-  background: #9f9;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.8); }
-  to { opacity: 1; transform: scale(1); }
-}
-@media(min-width:768px){
-  h1{ font-size:36px; gap:8px; }
-  a{ font-size:18px; }
-  .display-container{ padding:40px; border-radius:15px;}
-  .display{ font-size:90px; }
-  .partial-display{ font-size:50px; }
-  .subtitle{ font-size:20px; }
-  button{ font-size:18px; padding:15px 25px; border-radius:10px; }
-  table{ font-size:18px; }
-  .modal h2{ font-size:24px; }
-  .modal p{ font-size:18px; }
-  .close-btn{ font-size:18px; }
+@media (min-width:768px) {
+  h1 { font-size: 36px; gap: 8px; }
+  a { font-size: 18px; }
+  .display-container { padding: 30px; border-radius: 15px; max-width: 380px; }
+  .display { font-size: 90px; }
+  .partial-display { font-size: 45px; }
+  .subtitle { font-size: 20px; }
+  button { font-size: 18px; padding: 10px 18px; border-radius: 10px; }
+  table { font-size: 18px; }
+  .modal-content p { font-size: 16px; }
+  .close-btn { font-size: 16px; padding: 8px 14px; }
 }
 </style>
 </head>
@@ -124,17 +184,17 @@ th { background:#007bff; color:white; }
   </table>
 </div>
 
-<!-- 🔹 Modal de resumo -->
-<div class="modal-overlay" id="summaryModal">
-  <div class="modal">
-    <h2>📊 Resumo de Produtividade</h2>
-    <p id="summaryText">Carregando...</p>
-    <button class="close-btn" id="closeModalBtn">Fechar</button>
+<!-- Modal Resumo -->
+<div id="summaryModal" class="modal">
+  <div class="modal-content">
+    <h3>📊 Resumo de Produtividade</h3>
+    <p id="summaryText">Calculando...</p>
+    <button id="closeModalBtn" class="close-btn">Fechar</button>
   </div>
 </div>
 
 <script>
-let totalTime=0, partialTime=0, interval=null, running=false, registerCount=0;
+let totalTime = 0, partialTime = 0, interval = null, running = false, registerCount = 0;
 
 const display = document.getElementById("display");
 const partialDisplay = document.getElementById("partialDisplay");
@@ -148,6 +208,11 @@ const modal = document.getElementById("summaryModal");
 const summaryText = document.getElementById("summaryText");
 const closeModalBtn = document.getElementById("closeModalBtn");
 
+/**
+ * centezimalUnits: unidades internas (1 unidade = 60ms).
+ * 1000 unidades = 1 minuto.
+ * formatTime converte unidades para M.CCC (minutos.centezimal).
+ */
 function formatTime(centezimalUnits){
   const totalMinutes = centezimalUnits / 1000;
   const minutes = Math.floor(totalMinutes);
@@ -191,69 +256,75 @@ function reset(){
   registerBtn.disabled = true;
 }
 
-// Função registrar
 function register(){
   if(partialTime === 0) return;
   registerCount++;
-  const minBruto = partialTime / 1000;
+  const minBruto = partialTime / 1000; // minutos
   const paresDia = (528 / minBruto).toFixed(2);
   const paresHora = (60 / minBruto).toFixed(2);
   const row = document.createElement("tr");
-  row.innerHTML = `<td>${registerCount}</td><td>${formatTime(partialTime)}</td><td>${paresDia}</td><td>${paresHora}</td>`;
+  row.innerHTML = `<td>${registerCount}</td><td>${minBruto.toFixed(3)}</td><td>${paresDia}</td><td>${paresHora}</td>`;
   logTableBody.appendChild(row);
   partialTime = 0;
   updateDisplay();
 }
 
-// 🔹 Função mostrar resumo (agora pausa o tempo antes)
-function showSummary() {
-  // 🔸 Pausa o cronômetro automaticamente
-  stop();
+/* 
+  showSummary:
+  - pausa o cronômetro (stop)
+  - calcula a média do tempo bruto a partir da coluna "Tempo Bruto"
+  - usa essa média para calcular pares/hora e pares/dia
+*/
+function showSummary(){
+  stop(); // pausa o cronômetro automaticamente
 
   const rows = logTableBody.querySelectorAll("tr");
-  if (rows.length === 0) {
-    summaryText.innerHTML = "Nenhum registro encontrado.<br>Faça pelo menos um registro para gerar o resumo.";
-    modal.style.display = "flex";
+  if(rows.length === 0){
+    summaryText.innerHTML = "Nenhum registro encontrado.<br>Registre pelo menos um tempo antes de gerar o resumo.";
+    modal.style.display = "block";
     return;
   }
 
-  let totalTempo = 0, totalParesDia = 0, totalParesHora = 0;
-
-  rows.forEach(row => {
-    const cols = row.querySelectorAll("td");
-    const tempoBruto = parseFloat(cols[1].textContent);
-    const paresDia = parseFloat(cols[2].textContent);
-    const paresHora = parseFloat(cols[3].textContent);
-
-    totalTempo += tempoBruto;
-    totalParesDia += paresDia;
-    totalParesHora += paresHora;
+  // soma dos tempos (em minutos, porque na tabela armazenamos minBruto.toFixed(3))
+  let somaMinutos = 0;
+  rows.forEach(r => {
+    const textoTempo = r.children[1].textContent.trim(); // ex: "1.234"
+    const minutos = parseFloat(textoTempo.replace(',', '.'));
+    if(!isNaN(minutos)) somaMinutos += minutos;
   });
 
   const n = rows.length;
-  const mediaTempo = (totalTempo / n).toFixed(3);
-  const mediaDia = (totalParesDia / n).toFixed(2);
-  const mediaHora = (totalParesHora / n).toFixed(2);
+  const mediaMinutos = somaMinutos / n; // média em minutos (float)
+
+  // formatar tempo médio no mesmo padrão M.CCC:
+  const mediaCentezimalUnits = Math.round(mediaMinutos * 1000); // converter minutos -> unidades internas
+  const mediaTempoFormatado = formatTime(mediaCentezimalUnits);
+
+  // calcular pares por hora e pares por dia com base na média do tempo
+  const paresHora = mediaMinutos === 0 ? 0 : (60 / mediaMinutos);
+  const paresDia = mediaMinutos === 0 ? 0 : (528 / mediaMinutos);
 
   summaryText.innerHTML = `
     <strong>Registros:</strong> ${n}<br>
-    <strong>Tempo médio:</strong> ${mediaTempo} min<br>
-    <strong>Média pares/dia:</strong> ${mediaDia}<br>
-    <strong>Média pares/hora:</strong> ${mediaHora}
+    <strong>Tempo médio:</strong> ${mediaTempoFormatado} min<br>
+    <strong>Média pares/dia:</strong> ${paresDia.toFixed(2)}<br>
+    <strong>Média pares/hora:</strong> ${paresHora.toFixed(2)}
   `;
 
-  modal.style.display = "flex";
+  modal.style.display = "block";
 }
 
-// Fechar modal
-closeModalBtn.onclick = () => modal.style.display = "none";
-window.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
+function closeModal(){
+  modal.style.display = "none";
+}
 
 startBtn.onclick = start;
 stopBtn.onclick = stop;
 resetBtn.onclick = reset;
 registerBtn.onclick = register;
 summaryBtn.onclick = showSummary;
+closeModalBtn.onclick = closeModal;
+window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
 
 updateDisplay();
 </script>
